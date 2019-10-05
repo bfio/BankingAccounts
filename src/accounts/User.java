@@ -1,3 +1,4 @@
+package accounts;
 import java.math.BigDecimal;
 
 public class User {
