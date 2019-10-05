@@ -1,10 +1,17 @@
-
+package accounts;
 import java.math.BigDecimal;
 
-public class SavingsAccount extends Account {
+public class CheckingAccount extends Account {
 
-	private BigDecimal overdrawLimit;
-	
+	/**
+	 * This penalty constant is applied when making a withdrawal if the account balance is below zero
+	 */
+	private static final BigDecimal penalty = new BigDecimal(35);
+	/**
+	 * This limit constant is the minimum balance an account is allowed to reach without throwing an exception
+	 */
+	private static final BigDecimal limit = new BigDecimal(-5000);
+
 	/**
 	 * Constructor. Used to create an account derived from given account information. Goes through superclass for construction.
 	 * 
@@ -12,19 +19,19 @@ public class SavingsAccount extends Account {
 	 * @param accountOwner The person who owns the account
 	 * @param accountBalance The dollar balance within the account
 	 */
-	public SavingsAccount(String accountNumber, String accountOwner, BigDecimal accountBalance) {
+	public CheckingAccount(String accountNumber, String accountOwner, BigDecimal accountBalance) {
 		super(accountNumber, accountOwner, accountBalance);
 	}
-
+	
 	/**
 	 * Constructor. Used to create an account derived from a given User object. Goes through superclass for construction.
 	 * 
-	 * @throws InvalidTransactionException Thrown when an attempted transaction is invalid
+	 * @param user The User associated with the account
 	 */
-	public SavingsAccount(User user) {
+	public CheckingAccount(User user) {
 		super(user);
 	}
-	
+
 	/**
 	 * Used when adding a positive amount of money into an account.
 	 * 
@@ -48,33 +55,16 @@ public class SavingsAccount extends Account {
 	 */
 	@Override
 	public void withdraw(BigDecimal amount) throws InvalidTransactionException {
+		accountBalance = accountBalance.subtract(amount);
+		if (accountBalance.compareTo(BigDecimal.ZERO) == -1) {
+			System.out.println("Account overdrawn. $35 charge being assessed.");
+			accountBalance = accountBalance.subtract(penalty);	
+		}
 		if (amount.compareTo(BigDecimal.ZERO) == -1) {
 			throw new InvalidTransactionException("Cannot withdraw negative amount.");
-		} else if (amount.compareTo(accountBalance) == 1) {
-			throw new InvalidTransactionException("Cannot withdraw a balance greater than Savings Account amount.");
-		} else {
-			accountBalance = accountBalance.subtract(amount);
+		} 
+		if (accountBalance.compareTo(limit) == -1) {
+			throw new InvalidTransactionException("Overdraft limit (" + limit.toPlainString() + ") reached.");
 		}
 	}
-	
-	/**
-	 * Prints overdrawLimit for the account
-	 */
-	@Override
-	public void printOverdrawLimit() {
-		//Print as a plain string
-		System.out.println("Overdraw Limit: $" + overdrawLimit.toPlainString());
-	}
-
-	public BigDecimal getOverdrawLimit() {
-		return overdrawLimit;
-	}
-
-	public void setOverdrawLimit(BigDecimal overdrawLimit) {
-		this.overdrawLimit = overdrawLimit;
-	}
-	
-	
-	
-	
 }
